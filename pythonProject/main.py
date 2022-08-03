@@ -2,30 +2,34 @@ import tkinter as tk
 from tkinter import *
 from tkinter import messagebox,filedialog
 import pandas as pd
+import openpyxl
+import time
 import shopping
 
 root = tk.Tk()
 root.title('판매자 정보 크롤링 서비스')
 root.minsize(800, 300)  # 최소 사이즈
-global sellerInfo
+global sellerInfo, statusCode
+
 
 
 # 기능1 : 조회하기
 def get_data():
     listbox.delete(0, "end")
-    global sellerInfo
+    global sellerInfo, statusCode
     sellerInfo = []
-    sellerInfo = shopping.getMalls(keyword.get(), startIndex.get(), endIndex.get())
-    read_data()
+    start = time.time()
+    sellerInfo, statusCode = shopping.getMalls(keyword.get(), startIndex.get(), endIndex.get())
+    read_data(time.time()-start)
 
 
 # 기능2 : 데이터 가져오기
-def read_data():
-    global sellerInfo
+def read_data(time):
+    global sellerInfo,statusCode
     try:
         for data in sellerInfo:
             listbox.insert(END, list(data.values()))
-        txtTotal.config(text="총 : " + str(len(sellerInfo)) + "개")
+        txtTotal.config(text="총 : " + str(len(sellerInfo)) + "개,  응답코드 : ["+str(statusCode)+"] , 소요시간 : "+str(time)[0:4]+"초")
     except:
         listbox.delete(0, "end")
         messagebox.showerror("Error", "오류가 발생했습니다.")
@@ -41,8 +45,8 @@ def download():
             df = pd.DataFrame.from_records(sellerInfo)
             df.to_excel(excel_writer=str(fileLocation)+'/'+str(name)+'.xlsx')
             messagebox.showinfo("Success", "다운로드 되었습니다.")
-    except:
-        messagebox.showerror("Error", "오류가 발생했습니다.")
+    except Exception as e:
+        messagebox.showerror("Error", "오류가 발생했습니다." + str(e))
 
 
 # 기능4 : 저장할 위치 지정
@@ -69,7 +73,7 @@ lblstart = tk.Label(frm1, text='시작 페이지   ')
 lblend = tk.Label(frm1,text='종료 페이지  ')
 lbl2 = tk.Label(frm1, text='결과   ')
 lbl3 = tk.Label(frm1, text='저장 경로 선택   ')
-txtTotal = tk.Label(frm1, text="총 : 0개", width=8)
+txtTotal = tk.Label(frm1, text="총 0개")
 lbl4 = tk.Label(frm1, text='파일 이름 입력   ', pady= 10)
 script = tk.Label(frm1, text='입력하지 않을 경우, 시작 페이지 값 :1 , 종료 페이지 값 : 마지막', fg ='#E19C9C')
 script2 = tk.Label(frm1, text='파일 경로와 파일 이름을 꼭 입력하세요.', fg ='#E19C9C')
@@ -103,17 +107,16 @@ endIndex.grid(row=1, column=1 ,sticky='e')
 script.grid(row=2, column=1, pady=(0,15), sticky='w')
 
 lbl2.grid(row=3, column=0, sticky="en")
-listbox.grid(row=3, column=1, rowspan=3, sticky="we",pady=(0,50))
-txtTotal.grid(row=4, column=3, sticky="s")
+listbox.grid(row=3, column=1, rowspan=3, sticky="we")
+txtTotal.grid(row=6, column=1, sticky="w",pady=(0,50))
 
-lbl3.grid(row=6, column=0, sticky='n')
-fileRoot.grid(row=6, column=1, columnspan=2, sticky="we")
-btnRoot.grid(row=6, column=3)
+lbl3.grid(row=7, column=0, sticky='n')
+fileRoot.grid(row=7, column=1, columnspan=2, sticky="we")
+btnRoot.grid(row=7, column=3)
 
-lbl4.grid(row=7, column=0, sticky='n')
-fileName.grid(row=7, column=1, columnspan=2, sticky='we')
-script2.grid(row=8,column=1,sticky='w')
-btnDownLoad.grid(row=7, column=3)
+lbl4.grid(row=8, column=0, sticky='n')
+fileName.grid(row=8, column=1, columnspan=2, sticky='we')
+script2.grid(row=9,column=1,sticky='w')
 
 # 상단프레임 grid (2,1)은 창 크기에 맞춰 늘어나도록
 frm1.rowconfigure(2, weight=1)
