@@ -64,6 +64,7 @@ def getMalls(keyword, start, end):
 
 
 def getSellerInfo(mall_List):
+    global data
     result = []
     statusCode = 0
     for idx in range(len(mall_List)):
