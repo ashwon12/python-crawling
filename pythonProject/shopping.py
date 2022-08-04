@@ -1,6 +1,11 @@
 import requests
 import json
 from bs4 import BeautifulSoup
+import time
+
+# Tk progress를 update 해주기 위한 변수
+_CurrentProgress = None
+_ProgressBar = None
 
 # 쇼핑몰 불러 오기 헤더
 headers = {
@@ -22,6 +27,11 @@ headers = {
 
 
 def getMalls(keyword, start, end):
+    ''' Progress bar 값 변경 '''
+    if (_CurrentProgress != None) and (_ProgressBar != None):
+        _CurrentProgress.set( 10 )
+        _ProgressBar.update()
+
     index = 1
     if start != '':
         index = int(start)
@@ -49,6 +59,7 @@ def getMalls(keyword, start, end):
             mall_url = item['mallPcUrl'] + '/profile?cp=1'
             mall_list.append(mall_url)
         index = index + 1
+        break
     datas = [a for a in mall_list if "smartstore" in a]
     return getSellerInfo(list(set(datas)))
 
@@ -56,7 +67,13 @@ def getMalls(keyword, start, end):
 def getSellerInfo(mall_List):
     result = []
     statusCode = 0
-    for mall in mall_List:
+    for idx in range(len(mall_List)):
+        mall = mall_List[idx]
+        ''' Progress bar 값 변경 '''
+        if (_CurrentProgress != None) and (_ProgressBar != None):
+            _CurrentProgress.set( ((idx/len(mall_List)) * 100)+10 )
+            _ProgressBar.update()
+
         sellerHeaders = {
             'authority': 'smartstore.naver.com',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -78,7 +95,27 @@ def getSellerInfo(mall_List):
         params = {
             'cp': '1',
         }
-        data = requests.get(mall, headers=sellerHeaders, params = params)
+
+        ''' 503 에러 및 requests.get 작동 에러발생 시 보완하는 구간 '''
+        status_chk_count = 0
+        status_chk_flag = False
+        while status_chk_flag != True:
+            if status_chk_count > 3:    # 해당 카운트가 3 이상이면 다음 mall 정보를 요청하기위해 while 문을 멈춘다.
+                break
+            try:
+                time.sleep( 1 )   # request 하기 전에 0.5초의 딜레이를 준다. (503 에러 방지)
+                data = requests.get(mall, headers=sellerHeaders, params = params)     # DDoS 유발 가능성 존재. if Status == 503: sleep.until(ServerOpen)
+                status_chk_flag = True # request가 정상적으로 이루어졌을 경우, 이 값을 True로 변경
+            except Exception as e:
+                status_chk_count += 1   # requests.get 이 정상적으로 수행되지 않았을 경우, 해당 카운트를 1 증가한다.
+                time.sleep( 30 )    # request 시 에러가 발생할 경우, 30초 대기...
+                continue
+        
+        if status_chk_flag == False: # 위 로직에서 status_chk_count가 3번 이상 발생했을 경우, 이 조건문을 수행함
+            time.sleep( 30 )    # request 시 에러가 발생할 경우, 30초 대기...
+            continue
+        ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
         soup = BeautifulSoup(data.text, 'html.parser')
         body = soup.select_one('div.oSdeQo13Wd > div')
 
