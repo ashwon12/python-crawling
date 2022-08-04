@@ -59,12 +59,12 @@ def getMalls(keyword, start, end):
             mall_url = item['mallPcUrl'] + '/profile?cp=1'
             mall_list.append(mall_url)
         index = index + 1
-        break
     datas = [a for a in mall_list if "smartstore" in a]
     return getSellerInfo(list(set(datas)))
 
 
 def getSellerInfo(mall_List):
+    global data
     result = []
     statusCode = 0
     for idx in range(len(mall_List)):
