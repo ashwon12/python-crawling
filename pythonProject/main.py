@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox,filedialog
+import tkinter.ttk
 import pandas as pd
 import openpyxl
 import time
@@ -20,6 +21,10 @@ def get_data():
     sellerInfo = []
     start = time.time()
     sellerInfo, statusCode = shopping.getMalls(keyword.get(), startIndex.get(), endIndex.get())
+
+    ''' 모든 수집이 완료되었을 때, 100%로 올림 '''
+    shopping._CurrentProgress.set( 100 )
+    shopping._ProgressBar.update()
     read_data(time.time()-start)
 
 
@@ -122,6 +127,18 @@ script2.grid(row=9,column=1,sticky='w')
 frm1.rowconfigure(2, weight=1)
 frm1.columnconfigure(1, weight=1)
 btnDownLoad.pack()
+
+'''4. progress bar 생성'''
+frm_progress = tk.Frame(root,  pady=10 )
+frm_progress.grid(row=2, column=0, pady=5)
+
+CurrentProgress = tk.DoubleVar()
+ProgressBar     = tkinter.ttk.Progressbar(frm_progress, maximum=100, variable=CurrentProgress);
+ProgressBar.pack();
+
+
+shopping._CurrentProgress = CurrentProgress
+shopping._ProgressBar = ProgressBar
 
 if __name__ == "__main__":
     root.mainloop()
