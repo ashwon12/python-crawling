@@ -74,6 +74,7 @@ def getSellerInfo(mall_List):
             _CurrentProgress.set( ((idx/len(mall_List)) * 100)+10 )
             _ProgressBar.update()
 
+        '''
         sellerHeaders = {
             'authority': 'smartstore.naver.com',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -91,6 +92,11 @@ def getSellerInfo(mall_List):
             'upgrade-insecure-requests': '1',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
         }
+        '''
+        #del sellerHeaders
+        sellerHeaders = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+        }
 
         params = {
             'cp': '1',
@@ -105,6 +111,7 @@ def getSellerInfo(mall_List):
             try:
                 time.sleep( 1 )   # request 하기 전에 0.5초의 딜레이를 준다. (503 에러 방지)
                 data = requests.get(mall, headers=sellerHeaders, params = params)     # DDoS 유발 가능성 존재. if Status == 503: sleep.until(ServerOpen)
+                print( "[SEND] {0}".format(mall))
                 status_chk_flag = True # request가 정상적으로 이루어졌을 경우, 이 값을 True로 변경
             except Exception as e:
                 status_chk_count += 1   # requests.get 이 정상적으로 수행되지 않았을 경우, 해당 카운트를 1 증가한다.
@@ -121,7 +128,9 @@ def getSellerInfo(mall_List):
 
         statusCode = data.status_code
         if data.status_code != 200:
-            break
+            print( ">> Occurd not 200: {0} ({1})".format(mall, data.status_code)) # 위 로직에서 status_chk_count가 3번 이상 발생했을 경우, 이 조건문을 수행함
+            time.sleep( 30 )    # request 시 에러가 발생할 경우, 30초 대기...
+            continue
 
         seller_name = soup.select_one('div._3MuEQCqxSb > div._2i91yA8LnF > div._34hhYZytTs > div > strong').text
         seller_boss = body.select_one('div:nth-child(1) > div:nth-child(2) > div._2PXb_kpdRh').text
