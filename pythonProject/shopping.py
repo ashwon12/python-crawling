@@ -108,17 +108,17 @@ def getSellerInfo(mall_List):
         ''' 503 에러 및 requests.get 작동 에러발생 시 보완하는 구간 '''
         try:
             #time.sleep( random.randint(7,12) )   #  5~10sec, 7~12sec은 block 당함
-            time.sleep( random.randint(10,15) )   #  (503 에러 방지)
+            time.sleep( random.randint(20,30) )   #  (503 에러 방지)
             data = requests.get(mall, headers=sellerHeaders, 
                                 params = params)     # DDoS 유발 가능성 존재
             print( "[SEND][{0}/{1}] STATUS: {2}, {3}".format(mall_idx, len(mall_List), data.status_code, mall))
             if data.status_code != 200:
                 print( '[*] wait.. 60sec' )
-                time.sleep( 60  )    # request 시 에러가 발생할 경우, 30초 대기...
+                time.sleep( 80  )    # request 시 에러가 발생할 경우, 30초 대기...
                 continue
         except Exception as e:
             print( '[*] wait.. 70sec' )
-            time.sleep( 70 )  # request 시 에러가 발생할 경우, 30초 대기...
+            time.sleep(70)  # request 시 에러가 발생할 경우, 30초 대기...
             continue
         ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
         
