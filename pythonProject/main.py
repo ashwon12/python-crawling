@@ -32,7 +32,6 @@ def get_data():
     store.infor_group['info_origQuery'] = store.infor_group['info_query']
     start = time.time()
     sellerInfo = store.getDatas()
-    print(sellerInfo)
     ''' 모든 수집이 완료되었을 때, 100%로 올림 '''
     shopping._CurrentProgress.set(100)
     shopping._ProgressBar.update()
