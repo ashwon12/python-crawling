@@ -22,8 +22,8 @@ def get_data():
     #sellerInfo, statusCode = shopping.getMalls(keyword.get(), endIndex.get())
     fileLocation = fileRoot.get()
     name = fileName.get()
-    store.infor_group['output_file'] = str(fileLocation) + '/ST_SELLER_' + str(name) + '.xlsx'
-    store.infor_group['output_file_detail'] = str(fileLocation) + '/ST_DETAIL_' + str(name) + '.xlsx'
+    store.infor_group['output_file'] = str(fileLocation) + '/[x]' + str(name) + '.xlsx'
+    store.infor_group['output_file_detail'] = str(fileLocation) +'/'+ str(name) + '.xlsx'
     if startIndex.get() != '':
         store.infor_group['info_pagingIndex_s'] = int(startIndex.get())
     if endIndex.get() != '':
@@ -35,6 +35,7 @@ def get_data():
     ''' 모든 수집이 완료되었을 때, 100%로 올림 '''
     shopping._CurrentProgress.set(100)
     shopping._ProgressBar.update()
+    messagebox.showinfo("Success", "다운로드 되었습니다.")
     read_data(time.time() - start)
 
 
@@ -73,22 +74,22 @@ def location():
 
 '''1. 프레임 생성'''
 # 상단 프레임 (LabelFrame)
-frm1 = tk.LabelFrame(root, pady=15, padx=15)  # pad 내부
+frm1 = tk.Frame(root, pady=15, padx=15)  # pad 내부
 frm1.grid(row=0, column=0, pady=10, padx=10, sticky="nswe")  # pad 내부
 root.columnconfigure(0, weight=1)  # 프레임 (0,0)은 크기에 맞춰 늘어나도록
 root.rowconfigure(0, weight=1)
 # 하단 프레임 (Frame)
 frm2 = tk.Frame(root, pady=10)
-frm2.grid(row=1, column=0, pady=10)
+frm2.grid(row=1, column=0, padx=10)
 
 '''2. 요소 생성'''
 # 레이블
 lbl1 = tk.Label(frm1, text='검색어   ', pady=10)
 lblstart = tk.Label(frm1, text='시작 페이지   ')
 lblend = tk.Label(frm1, text='종료 페이지  ')
-lbl2 = tk.Label(frm1, text='결과   ')
+lbl2 = tk.Label(frm2, text='결과   ')
 lbl3 = tk.Label(frm1, text='저장 경로 선택   ')
-txtTotal = tk.Label(frm1, text="총 0개")
+txtTotal = tk.Label(frm2, text="총 0개")
 lbl4 = tk.Label(frm1, text='파일 이름 입력   ', pady=10)
 script = tk.Label(frm1, text='입력하지 않을 경우, 시작 페이지 값 :1 , 종료 페이지 값 : 마지막', fg='#E19C9C')
 script2 = tk.Label(frm1, text='파일 경로와 파일 이름을 꼭 입력하세요.', fg='#E19C9C')
@@ -101,10 +102,10 @@ startIndex = tk.Entry(frm1, width=20)
 endIndex = tk.Entry(frm1, width=20)
 
 # 리스트박스
-listbox = tk.Listbox(frm1, width=40, selectmode='extended')
+listbox = tk.Listbox(frm2, width=90, selectmode='extended')
 
 # 버튼
-btnInput = tk.Button(frm1, text="입력", width=8, command=get_data)
+btnInput = tk.Button(frm1, text="데이터 출력", width=8, command=get_data)
 btnDownLoad = tk.Button(frm2, text="다운로드", width=8, command=download)
 btnRoot = tk.Button(frm1, text="찾아보기", width=8, command=location)
 
@@ -116,7 +117,7 @@ ProgressBar = tkinter.ttk.Progressbar(frm1, maximum=100, variable=CurrentProgres
 # 상단 프레임
 lbl1.grid(row=0, column=0, sticky="e")
 keyword.grid(row=0, column=1, columnspan=2, sticky="we")
-btnInput.grid(row=0, column=3)
+btnInput.grid(row=7, column=1)
 
 lblstart.grid(row=1, column=0, sticky='e')
 startIndex.grid(row=1, column=1, sticky='w')
@@ -125,24 +126,26 @@ endIndex.grid(row=1, column=1, sticky='e')
 
 script.grid(row=2, column=1, pady=(0, 15), sticky='w')
 
-ProgressBar.grid(row=3, column=1, sticky='we', pady=(0, 15))
+ProgressBar.grid(row=6, column=1, sticky='we', pady=(0, 15))
 
-lbl2.grid(row=4, column=0, sticky="en")
-listbox.grid(row=4, column=1, rowspan=3, sticky="we")
-txtTotal.grid(row=7, column=1, sticky="w", pady=(0, 50))
+# lbl2.grid(row=4, column=0, sticky="en")
+# listbox.grid(row=4, column=1, rowspan=3, sticky="we")
+# txtTotal.grid(row=7, column=1, sticky="w", pady=(0, 50))
 
-lbl3.grid(row=8, column=0, sticky='n')
-fileRoot.grid(row=8, column=1, columnspan=2, sticky="we")
-btnRoot.grid(row=8, column=3)
+lbl3.grid(row=3, column=0, sticky='n')
+fileRoot.grid(row=3, column=1, columnspan=2, sticky="we")
+btnRoot.grid(row=3, column=3)
 
-lbl4.grid(row=9, column=0, sticky='n')
-fileName.grid(row=9, column=1, columnspan=2, sticky='we')
-script2.grid(row=10, column=1, sticky='w')
+lbl4.grid(row=4, column=0, sticky='n')
+fileName.grid(row=4, column=1, columnspan=2, sticky='we')
+script2.grid(row=5, column=1, sticky='w', pady=(0,10))
 
 # 상단프레임 grid (2,1)은 창 크기에 맞춰 늘어나도록
 frm1.rowconfigure(2, weight=1)
 frm1.columnconfigure(1, weight=1)
-btnDownLoad.pack()
+
+txtTotal.grid(row=0, column=0 ,sticky="w")
+listbox.grid(row=1, column=0, rowspan=5,sticky="s",pady=(0,30))
 
 shopping._CurrentProgress = CurrentProgress
 shopping._ProgressBar = ProgressBar
